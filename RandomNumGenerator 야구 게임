@@ -1,0 +1,160 @@
+import java.util.Scanner;
+
+interface NumGenerator
+{
+    int[] Generate();
+}
+
+class RandomNumGenerator implements NumGenerator
+{
+    @Override
+    public int[] Generate()
+    {
+        int[] num = new int[3];
+        int count = 0;
+
+        while (count < 3)
+        {
+            int cn = (int)(Math.random() * 9) + 1;
+            boolean isOverlap = false;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (num[i] == cn)
+                {
+                    isOverlap = true;
+                    break;
+                }
+
+                isOverlap = false;
+            }
+
+            if (!isOverlap)
+            {
+                num[count] = cn;
+                // System.out.println(num[count]);
+                count++;
+            }
+        }
+
+        return num;
+    }
+}
+
+abstract class Game
+{
+    protected int[] computerNum;
+    protected int[] playerNum;
+
+    abstract void Initialize();
+    abstract void Play();
+    abstract String PrintResult();
+    abstract boolean PlayAgain();
+}
+
+class BaseballGame extends Game
+{
+    private int strikes;
+    private int balls;
+    private int turn;
+    private NumGenerator numGenerator;
+
+    public BaseballGame(NumGenerator generator)
+    {
+        numGenerator = generator;
+    }
+
+    @Override
+    public void Initialize()
+    {
+        computerNum = numGenerator.Generate();
+        playerNum = new int[3];
+        strikes = 0;
+        balls = 0;
+        turn = 0;
+    }
+
+    @Override
+    public void Play()
+    {
+        System.out.println("야구 게임을 시작합니다");
+
+        while (true)
+        {
+            turn++;
+            System.out.println("턴 #" + turn);
+            GetInput();
+            System.out.println(PrintResult());
+            strikes = 0;
+            balls = 0;
+            if (!PlayAgain()) break;
+        }
+    }
+
+    @Override
+    public String PrintResult()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (computerNum[i] == playerNum[i])
+            {
+                strikes++;
+            }
+            else if (contains(computerNum, playerNum[i]))
+            {
+                balls++;
+            }
+        }
+
+        if (strikes == 3)
+        {
+            return "스트라이크 아웃!";
+        }
+        else
+        {
+            return strikes + "스트라이크 " + balls + "볼";
+        }
+    }
+
+    @Override
+    public boolean PlayAgain()
+    {
+        System.out.println("계속 하시겠습니까? (Y/N)");
+        String choice = new Scanner(System.in).next();
+
+        return choice.equalsIgnoreCase("Y");
+    }
+
+    private void GetInput()
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("3개의 정수를 입력하세요!");
+        for (int i = 0; i < 3; i++)
+        {
+            System.out.print((i + 1) + "st : ");
+            playerNum[i] = scanner.nextInt();
+        }
+    }
+
+    private boolean contains(int[] com, int player)
+    {
+        for (int value : com)
+        {
+            if (player == value)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) 
+    {
+        NumGenerator numGenerator = new RandomNumGenerator();
+        Game baseballGame = new BaseballGame(numGenerator);
+        baseballGame.Initialize();
+        baseballGame.Play();
+    }
+}
