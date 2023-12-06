@@ -1,0 +1,43 @@
+import csv
+import matplotlib.pyplot as plt
+
+def get_data(filename, search_texts):
+    data = {'1부': [], '2부': [], '3부': []}
+
+    with open(filename, 'r', encoding='utf-8') as csv_file:
+        csv_data = csv.reader(csv_file)
+
+        for line in csv_data:
+            if line[1] in search_texts:
+                data[line[1]].append(int(line[2].replace(',', '')))
+
+    return data
+
+def display_bar_chart(title, data):
+    plt.rc('font', family='Malgun Gothic')
+    plt.rc('axes', unicode_minus=False)
+
+    plt.title(title)
+    time_slots = list(data.keys())
+    num_time_slots = len(time_slots)
+    num_data_points = len(data[time_slots[0]])
+
+    for i, time_slot in enumerate(time_slots):
+        if len(data[time_slot]) != num_data_points:
+            print(f"Error: '{time_slot}' 데이터 길이가 일치하지 않습니다. 길이: {len(data[time_slot])}")
+            continue
+
+        x_positions = [x + i(1.0/num_time_slots) for x in range(num_data_points)]
+        plt.bar(x_positions, data[time_slot], width=1.0/(num_time_slots+1), label=time_slot)
+
+    plt.xlabel('시간대')
+    plt.ylabel('내국인 입장객수')
+    plt.xticks([r + num_time_slots / 2 0.25 for r in range(num_data_points)], range(num_data_points))  # x축 레이블 수정
+    plt.legend()
+    plt.show()
+
+filename = 'fas.csv'
+search_words = ['1부', '2부', '3부']
+
+data = get_data(filename, search_words)
+display_bar_chart('강원랜드 내국인 시간대별 입장객수', data)
